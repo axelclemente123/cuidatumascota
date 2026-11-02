@@ -1,0 +1,377 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CuidaTuMascota - ESET UNQ</title>
+    <link rel="stylesheet" href="styles.css">
+    <script src="https://unpkg.com/@phosphor-icons/web"></script>
+</head>
+<body>
+
+    <!-- PANTALLA DE LOGIN / REGISTRO DE USUARIO -->
+    <div id="authOverlay" class="auth-overlay">
+        <div class="auth-card">
+            <div class="auth-header">
+                <i class="ph ph-heart-beat auth-icon"></i>
+                <h2>CuidaTuMascota</h2>
+                <p>Plataforma de Gestión Veterinaria e Inteligencia Artificial</p>
+            </div>
+
+            <div class="auth-tabs">
+                <button id="tabLoginBtn" class="auth-tab active" onclick="cambiarTabAuth('login')">Iniciar Sesión</button>
+                <button id="tabRegisterBtn" class="auth-tab" onclick="cambiarTabAuth('register')">Registrarse</button>
+            </div>
+
+            <form id="formLogin" onsubmit="iniciarSesion(event)" class="auth-form">
+                <div class="form-group">
+                    <label for="loginEmail">Correo Electrónico *</label>
+                    <input type="email" id="loginEmail" placeholder="ejemplo@eset.unq.edu.ar" required>
+                </div>
+                <div class="form-group">
+                    <label for="loginPass">Contraseña *</label>
+                    <input type="password" id="loginPass" placeholder="••••••••" required>
+                </div>
+                <button type="submit" class="btn-primary w-full">Entrar al Sistema</button>
+            </form>
+
+            <form id="formRegister" onsubmit="registrarUsuario(event)" class="auth-form oculto">
+                <div class="form-group">
+                    <label for="regNombre">Nombre Completo *</label>
+                    <input type="text" id="regNombre" placeholder="Tu nombre" required>
+                </div>
+                <div class="form-group">
+                    <label for="regEmail">Correo Electrónico *</label>
+                    <input type="email" id="regEmail" placeholder="tu-email@gmail.com" required>
+                </div>
+                <div class="form-group">
+                    <label for="regPass">Contraseña *</label>
+                    <input type="password" id="regPass" placeholder="Mínimo 6 caracteres" required minlength="6">
+                </div>
+                <button type="submit" class="btn-primary w-full">Crear Cuenta</button>
+            </form>
+
+            <div id="authAlert" class="alerta oculto"></div>
+        </div>
+    </div>
+
+    <!-- APLICACIÓN PRINCIPAL -->
+    <div id="appContent" class="app-container oculto">
+        <aside class="sidebar">
+            <div class="brand">
+                <i class="ph ph-shield-check brand-icon"></i>
+                <div>
+                    <h2>CuidaTuMascota</h2>
+                    <span class="badge-eset">ESET UNQ • 6to Programación</span>
+                </div>
+            </div>
+
+            <nav class="sidebar-nav">
+                <button class="nav-btn active" onclick="mostrarSeccion('inicio')">
+                    <i class="ph ph-squares-four"></i> Inicio
+                </button>
+                <button class="nav-btn" onclick="mostrarSeccion('registro')">
+                    <i class="ph ph-plus-circle"></i> Registrar Mascota
+                </button>
+                <button class="nav-btn" onclick="mostrarSeccion('mascotas')">
+                    <i class="ph ph-paw"></i> Mis Mascotas
+                </button>
+                <button class="nav-btn" onclick="mostrarSeccion('ia-chat')">
+                    <i class="ph ph-sparkle"></i> Asistente IA
+                </button>
+            </nav>
+
+            <div class="user-profile">
+                <div class="user-info">
+                    <i class="ph ph-user-circle"></i>
+                    <div>
+                        <strong id="userNameDisplay">Usuario</strong>
+                        <span id="userEmailDisplay">email@ejemplo.com</span>
+                    </div>
+                </div>
+                <button class="btn-logout" onclick="cerrarSesion()" title="Cerrar sesión">
+                    <i class="ph ph-sign-out"></i>
+                </button>
+            </div>
+        </aside>
+
+        <main class="main-content">
+
+            <!-- SECCIÓN 1: INICIO -->
+            <section id="inicio" class="modulo active">
+                <div class="welcome-banner">
+                    <h2>¡Hola, <span id="welcomeUser">Usuario</span>! 👋</h2>
+                    <p>Bienvenido al panel central de control veterinario e IA especializada.</p>
+                </div>
+
+                <div class="quick-stats">
+                    <div class="stat-card">
+                        <i class="ph ph-paw stat-icon"></i>
+                        <div>
+                            <h3 id="countMascotas">0</h3>
+                            <p>Mascotas Registradas</p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="card-grid">
+                    <div class="card" onclick="mostrarSeccion('registro')">
+                        <div class="card-icon"><i class="ph ph-plus-circle"></i></div>
+                        <h3>Nueva Mascota</h3>
+                        <p>Añadí perfiles con expediente de vacunas, edad, peso y foto.</p>
+                    </div>
+                    <div class="card" onclick="mostrarSeccion('mascotas')">
+                        <div class="card-icon"><i class="ph ph-magnifying-glass"></i></div>
+                        <h3>Consultar Mascotas</h3>
+                        <p>Revisá expedientes médicos, inmunizaciones e historial.</p>
+                    </div>
+                    <div class="card" onclick="mostrarSeccion('ia-chat')">
+                        <div class="card-icon"><i class="ph ph-sparkle"></i></div>
+                        <h3>Asistente IA Pro</h3>
+                        <p>Análisis inteligente personalizado según datos biológicos reales.</p>
+                    </div>
+                </div>
+            </section>
+
+            <!-- SECCIÓN 2: REGISTRO DE MASCOTA -->
+            <section id="registro" class="modulo">
+                <div class="section-header">
+                    <h2>Registrar Nueva Mascota</h2>
+                    <p>Ingresá los datos del paciente para habilitar la asistencia médica por IA.</p>
+                </div>
+
+                <form id="formMascota" class="formulario-card" onsubmit="guardarMascota(event)">
+                    <div class="form-grid">
+                        <div class="form-group">
+                            <label for="nombre">Nombre *</label>
+                            <input type="text" id="nombre" placeholder="Ej: Zell" required>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="especie">Especie *</label>
+                            <select id="especie" required>
+                                <option value="">Seleccionar especie</option>
+                                <option value="Perro">Perro 🐶</option>
+                                <option value="Gato">Gato 🐱</option>
+                                <option value="Ave">Ave 🦜</option>
+                                <option value="Conejo">Conejo 🐰</option>
+                                <option value="Otro">Otro 🐾</option>
+                            </select>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="edad">Edad (años) *</label>
+                            <input type="number" id="edad" min="0" max="30" placeholder="Ej: 1" required>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="raza">Raza *</label>
+                            <input type="text" id="raza" placeholder="Ej: Mestizo, Caniche..." required>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="peso">Peso en Kilogramos (kg)</label>
+                            <input type="number" id="peso" step="0.1" placeholder="Ej: 5.5">
+                        </div>
+                    </div>
+
+                    <div class="photo-section">
+                        <label>Fotografía del Paciente (Opcional)</label>
+                        <div class="photo-inputs">
+                            <div class="form-group">
+                                <label for="fotoFile" class="custom-file-upload">
+                                    <i class="ph ph-upload-simple"></i> Subir Imagen Local
+                                </label>
+                                <input type="file" id="fotoFile" accept="image/*" onchange="previewImagenLocal(event)">
+                            </div>
+                            <span class="or-divider">o</span>
+                            <div class="form-group flex-1">
+                                <input type="url" id="fotoUrl" placeholder="Pegar enlace de imagen online (http://...)" onchange="previewImagenUrl(this.value)">
+                            </div>
+                        </div>
+                        <div id="imagePreviewContainer" class="image-preview oculto">
+                            <img id="imagePreview" src="" alt="Vista previa">
+                            <button type="button" class="btn-remove-photo" onclick="quitarFoto()"><i class="ph ph-trash"></i> Quitar</button>
+                        </div>
+                    </div>
+
+                    <div id="registroAlert" class="alerta oculto"></div>
+
+                    <button type="submit" class="btn-primary"><i class="ph ph-floppy-disk"></i> Guardar Expediente</button>
+                </form>
+            </section>
+
+            <!-- SECCIÓN 3: CONSULTAR MASCOTAS -->
+            <section id="mascotas" class="modulo">
+                <div class="section-header">
+                    <h2>Expedientes de Mascotas</h2>
+                    <p>Fichas técnicas de salud, plan de vacunas e integración directa con IA.</p>
+                </div>
+                <div id="listaMascotas" class="mascotas-grid"></div>
+            </section>
+
+            <!-- SECCIÓN 4: ASISTENTE IA ULTRA PROFESIONAL -->
+            <section id="ia-chat" class="modulo">
+                <div class="ia-pro-header">
+                    <div>
+                        <h2><i class="ph ph-sparkle-fill" style="color: #10b981;"></i> Asistente Veterinario Inteligente</h2>
+                        <p>Motor de asistencia contextual alimentado por la ficha médica del paciente.</p>
+                    </div>
+                    <div class="ia-engine-badge">
+                        <span class="pulse-dot"></span> Core IA v2.4 Conectado
+                    </div>
+                </div>
+
+                <div class="ia-pro-workspace">
+                    <!-- Barra de Contexto Activo -->
+                    <div class="ia-context-bar">
+                        <div class="context-label">
+                            <i class="ph ph-cpu"></i> Contexto Biológico Activo:
+                        </div>
+                        <div class="context-select-box">
+                            <i class="ph ph-paw"></i>
+                            <select id="selectMascotaIA" onchange="cambiarMascotaConsultaIA()">
+                                <option value="general">-- Consulta General (Modo Estándar) --</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <!-- Panel de Accesos Rápidos Pro -->
+                    <div class="ia-quick-actions">
+                        <button class="pro-chip" onclick="lanzarPreguntaRapida('¿Qué vacunas le corresponden por su edad y especie?')">
+                            <i class="ph ph-syringe"></i> Vacunas y Calendario
+                        </button>
+                        <button class="pro-chip" onclick="lanzarPreguntaRapida('¿Qué alimentación me recomendás para su edad y peso?')">
+                            <i class="ph ph-bowl-food"></i> Dieta y Nutrición
+                        </button>
+                        <button class="pro-chip" onclick="lanzarPreguntaRapida('¿Qué cuidados y ejercicios son ideales para su raza?')">
+                            <i class="ph ph-activity"></i> Ejercicio y Raza
+                        </button>
+                        <button class="pro-chip" onclick="lanzarPreguntaRapida('¿Cuándo debería consultar al veterinario por un síntoma?')">
+                            <i class="ph ph-warning-circle"></i> Triaje de Alertas
+                        </button>
+                    </div>
+
+                    <!-- Ventana de Chat Flotante Avanzada -->
+                    <div class="ai-chat-window">
+                        <div id="chatMessages" class="ai-messages-scroll">
+                            <div class="message-row bot-row">
+                                <div class="ai-avatar-badge"><i class="ph ph-robot"></i></div>
+                                <div class="chat-bubble bot-bubble">
+                                    <div class="ai-response-header">
+                                        <span class="ai-name">Asistente CuidaTuMascota</span>
+                                        <span class="ai-time">Sistema</span>
+                                    </div>
+                                    ¡Hola! Soy tu asistente veterinario. Seleccioná una mascota en el desplegable superior para iniciar el análisis contextual de sus fichas o realizá cualquier consulta clínica general.
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Indicador de procesamiento -->
+                        <div id="typingIndicator" class="typing-indicator oculto">
+                            <div class="ai-avatar-badge"><i class="ph ph-robot"></i></div>
+                            <div class="typing-bubble">
+                                <span></span><span></span><span></span>
+                            </div>
+                        </div>
+
+                        <form class="ai-input-bar" onsubmit="enviarPreguntaIA(event)">
+                            <input type="text" id="chatInput" placeholder="Escribí tu consulta técnica sobre salud, nutrición o prevención..." autocomplete="off" required>
+                            <button type="submit" class="btn-send-pro"><i class="ph ph-paper-plane-right-fill"></i></button>
+                        </form>
+                    </div>
+                </div>
+            </section>
+
+        </main>
+    </div>
+
+    <!-- MODAL DE GESTIÓN DE VACUNAS -->
+    <div id="modalVacunas" class="modal-overlay oculto">
+        <div class="modal-card">
+            <div class="modal-header">
+                <h3><i class="ph ph-syringe"></i> Carnet de Inmunización: <span id="modalMascotaNombre">Mascota</span></h3>
+                <button class="btn-close" onclick="cerrarModalVacunas()"><i class="ph ph-x"></i></button>
+            </div>
+            <div class="modal-body">
+                <form id="formVacuna" onsubmit="registrarVacuna(event)" class="form-vacuna">
+                    <input type="text" id="vacunaNombre" placeholder="Vacuna (Ej: Antirrábica, Séxtuple)" required>
+                    <input type="date" id="vacunaFecha" required>
+                    <button type="submit" class="btn-primary"><i class="ph ph-plus"></i> Añadir</button>
+                </form>
+                <h4>Historial de Inmunización:</h4>
+                <ul id="listaVacunasMascota" class="lista-vacunas"></ul>
+            </div>
+        </div>
+    </div>
+
+    <!-- MODAL DE EDICIÓN COMPACTO -->
+    <div id="modalEditar" class="modal-overlay oculto">
+        <div class="modal-card modal-compacto">
+            <div class="modal-header">
+                <h3><i class="ph ph-note-pencil"></i> Actualizar Ficha de Paciente</h3>
+                <button class="btn-close" onclick="cerrarModalEditar()"><i class="ph ph-x"></i></button>
+            </div>
+            <div class="modal-body">
+                <form id="formEditarMascota" onsubmit="guardarEdicionMascota(event)" class="formulario-card form-edit-compact">
+                    <input type="hidden" id="editMascotaId">
+
+                    <div class="form-grid">
+                        <div class="form-group">
+                            <label for="editNombre">Nombre *</label>
+                            <input type="text" id="editNombre" required>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="editEspecie">Especie *</label>
+                            <select id="editEspecie" required>
+                                <option value="Perro">Perro 🐶</option>
+                                <option value="Gato">Gato 🐱</option>
+                                <option value="Ave">Ave 🦜</option>
+                                <option value="Conejo">Conejo 🐰</option>
+                                <option value="Otro">Otro 🐾</option>
+                            </select>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="editEdad">Edad (años) *</label>
+                            <input type="number" id="editEdad" min="0" max="30" required>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="editRaza">Raza *</label>
+                            <input type="text" id="editRaza" required>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="editPeso">Peso (kg)</label>
+                            <input type="number" id="editPeso" step="0.1">
+                        </div>
+                    </div>
+
+                    <div class="photo-section photo-edit-compact">
+                        <label>Foto de Perfil</label>
+                        <div class="photo-inputs">
+                            <label for="editFotoFile" class="custom-file-upload">
+                                <i class="ph ph-upload-simple"></i> Cambiar Foto
+                            </label>
+                            <input type="file" id="editFotoFile" accept="image/*" onchange="previewImagenLocalEdit(event)">
+                            <input type="url" id="editFotoUrl" placeholder="URL de imagen..." onchange="previewImagenUrlEdit(this.value)">
+                        </div>
+                        <div id="editImagePreviewContainer" class="image-preview">
+                            <img id="editImagePreview" src="" alt="Vista previa">
+                        </div>
+                    </div>
+
+                    <div class="modal-actions">
+                        <button type="button" class="btn-secondary" onclick="cerrarModalEditar()">Cancelar</button>
+                        <button type="submit" class="btn-primary"><i class="ph ph-floppy-disk"></i> Guardar Cambios</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html>
