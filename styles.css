@@ -906,3 +906,30 @@ input[type="file"] { display: none; }
 
 .alerta.error { background: #fee2e2; color: var(--danger); }
 .alerta.exito { background: #d1fae5; color: var(--primary-dark); }
+/* =========================================================
+   ADAPTACIÓN PARA CELULARES Y PANTALLAS CHICAS (RESPONSIVE)
+   ========================================================= */
+@media (max-width: 768px) {
+    /* Permitir que la estructura principal se apile verticalmente */
+    .app-container {
+        flex-direction: column !important;
+    }
+
+    /* Ajustar la barra lateral para que ocupe todo el ancho arriba */
+    .sidebar {
+        width: 100% !important;
+        height: auto !important;
+        position: relative !important;
+    }
+
+    /* Hacer que el contenido principal también ocupe todo el ancho */
+    .main-content {
+        width: 100% !important;
+        padding: 1rem !important;
+    }
+
+    /* Adaptar las grillas de las tarjetas para que no se amontonen */
+    .card-grid, .form-grid, .mascotas-grid {
+        grid-template-columns: 1fr !important;
+    }
+}
