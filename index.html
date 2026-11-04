@@ -9,6 +9,9 @@
 </head>
 <body>
 
+    <!-- CONTENEDOR DE NOTIFICACIONES FLOTANTES (TOAST) -->
+    <div id="toastContainer" class="toast-container"></div>
+
     <!-- PANTALLA DE LOGIN / REGISTRO DE USUARIO -->
     <div id="authOverlay" class="auth-overlay">
         <div class="auth-card">
@@ -118,7 +121,7 @@
                     <div class="card" onclick="mostrarSeccion('registro')">
                         <div class="card-icon"><i class="ph ph-plus-circle"></i></div>
                         <h3>Nueva Mascota</h3>
-                        <p>Añadí perfiles con expediente de vacunas, edad, peso y foto.</p>
+                        <p>Añadí perfiles con expediente de vacunas, edad en años y meses, peso en gramos y foto.</p>
                     </div>
                     <div class="card" onclick="mostrarSeccion('mascotas')">
                         <div class="card-icon"><i class="ph ph-magnifying-glass"></i></div>
@@ -137,7 +140,7 @@
             <section id="registro" class="modulo">
                 <div class="section-header">
                     <h2>Registrar Nueva Mascota</h2>
-                    <p>Ingresá los datos del paciente para habilitar la asistencia médica por IA.</p>
+                    <p>Ingresá los datos detallados del paciente para habilitar la asistencia médica por IA.</p>
                 </div>
 
                 <form id="formMascota" class="formulario-card" onsubmit="guardarMascota(event)">
@@ -159,9 +162,16 @@
                             </select>
                         </div>
 
-                        <div class="form-group">
-                            <label for="edad">Edad (años) *</label>
-                            <input type="number" id="edad" min="0" max="30" placeholder="Ej: 1" required>
+                        <!-- EDAD: AÑOS Y MESES -->
+                        <div class="form-group-inline-double">
+                            <div class="form-group">
+                                <label for="edadAnios">Edad (Años) *</label>
+                                <input type="number" id="edadAnios" min="0" max="30" placeholder="Ej: 1" required>
+                            </div>
+                            <div class="form-group">
+                                <label for="edadMeses">Meses (0-11)</label>
+                                <input type="number" id="edadMeses" min="0" max="11" placeholder="Ej: 4">
+                            </div>
                         </div>
 
                         <div class="form-group">
@@ -169,9 +179,16 @@
                             <input type="text" id="raza" placeholder="Ej: Mestizo, Caniche..." required>
                         </div>
 
-                        <div class="form-group">
-                            <label for="peso">Peso en Kilogramos (kg)</label>
-                            <input type="number" id="peso" step="0.1" placeholder="Ej: 5.5">
+                        <!-- PESO: KILOGRAMOS Y GRAMOS -->
+                        <div class="form-group-inline-double">
+                            <div class="form-group">
+                                <label for="pesoKg">Peso (kg)</label>
+                                <input type="number" id="pesoKg" min="0" placeholder="Ej: 5">
+                            </div>
+                            <div class="form-group">
+                                <label for="pesoGramos">Gramos (g)</label>
+                                <input type="number" id="pesoGramos" min="0" max="999" placeholder="Ej: 500">
+                            </div>
                         </div>
                     </div>
 
@@ -333,9 +350,16 @@
                             </select>
                         </div>
 
-                        <div class="form-group">
-                            <label for="editEdad">Edad (años) *</label>
-                            <input type="number" id="editEdad" min="0" max="30" required>
+                        <!-- EDAD EDITAR: AÑOS Y MESES -->
+                        <div class="form-group-inline-double">
+                            <div class="form-group">
+                                <label for="editEdadAnios">Años *</label>
+                                <input type="number" id="editEdadAnios" min="0" max="30" required>
+                            </div>
+                            <div class="form-group">
+                                <label for="editEdadMeses">Meses</label>
+                                <input type="number" id="editEdadMeses" min="0" max="11">
+                            </div>
                         </div>
 
                         <div class="form-group">
@@ -343,9 +367,16 @@
                             <input type="text" id="editRaza" required>
                         </div>
 
-                        <div class="form-group">
-                            <label for="editPeso">Peso (kg)</label>
-                            <input type="number" id="editPeso" step="0.1">
+                        <!-- PESO EDITAR: KILOGRAMOS Y GRAMOS -->
+                        <div class="form-group-inline-double">
+                            <div class="form-group">
+                                <label for="editPesoKg">Peso (kg)</label>
+                                <input type="number" id="editPesoKg" min="0">
+                            </div>
+                            <div class="form-group">
+                                <label for="editPesoGramos">Gramos (g)</label>
+                                <input type="number" id="editPesoGramos" min="0" max="999">
+                            </div>
                         </div>
                     </div>
 
