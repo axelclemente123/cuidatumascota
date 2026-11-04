@@ -15,6 +15,28 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 });
 
+// Sistema de Notificaciones Toast Flotantes
+function mostrarNotificacion(mensaje, tipo = 'exito') {
+    const container = document.getElementById('toastContainer');
+    if (!container) return;
+
+    const toast = document.createElement('div');
+    toast.className = `toast ${tipo}`;
+    
+    const icono = tipo === 'exito' ? 'ph-check-circle' : 'ph-warning-circle';
+    toast.innerHTML = `
+        <i class="ph ${icono}"></i>
+        <span>${mensaje}</span>
+    `;
+
+    container.appendChild(toast);
+
+    // Eliminar el toast del DOM después de que termine la animación (3 segundos)
+    setTimeout(() => {
+        toast.remove();
+    }, 3000);
+}
+
 // Cambiar entre Pestañas de Auth (Login / Registro)
 function cambiarTabAuth(tab) {
     const tabLoginBtn = document.getElementById('tabLoginBtn');
@@ -59,6 +81,7 @@ function registrarUsuario(e) {
     usuarioActual = nuevoUsuario;
     localStorage.setItem('usuario_activo', JSON.stringify(usuarioActual));
 
+    mostrarNotificacion(`¡Bienvenido/a a CuidaTuMascota, ${nombre}!`, "exito");
     mostrarDashboard();
 }
 
@@ -78,6 +101,7 @@ function iniciarSesion(e) {
 
     usuarioActual = usuario;
     localStorage.setItem('usuario_activo', JSON.stringify(usuarioActual));
+    mostrarNotificacion(`¡Sesión iniciada con éxito!`, "exito");
     mostrarDashboard();
 }
 
@@ -87,6 +111,7 @@ function cerrarSesion() {
     usuarioActual = null;
     document.getElementById('appContent').classList.add('oculto');
     document.getElementById('authOverlay').classList.remove('oculto');
+    mostrarNotificacion("Sesión cerrada correctamente.", "exito");
 }
 
 // Mostrar Dashboard Principal
@@ -150,14 +175,22 @@ function quitarFoto() {
     document.getElementById('imagePreviewContainer').classList.add('oculto');
 }
 
-// GUARDAR NUEVA MASCOTA CON FOTO
+// GUARDAR NUEVA MASCOTA CON AÑOS, MESES, KILOS Y GRAMOS
 function guardarMascota(e) {
     e.preventDefault();
     const nombre = document.getElementById('nombre').value.trim();
     const especie = document.getElementById('especie').value;
-    const edad = document.getElementById('edad').value;
+    
+    // Capturar Años y Meses
+    const edadAnios = document.getElementById('edadAnios').value || "0";
+    const edadMeses = document.getElementById('edadMeses').value || "0";
+    
     const raza = document.getElementById('raza').value.trim();
-    const peso = document.getElementById('peso').value || "No especificado";
+    
+    // Capturar Kilos y Gramos
+    const pesoKg = document.getElementById('pesoKg').value || "0";
+    const pesoGramos = document.getElementById('pesoGramos').value || "0";
+    
     const alert = document.getElementById('registroAlert');
 
     const fotoFinal = tempFotoData || obtenerImagenPorDefecto(especie);
@@ -167,9 +200,11 @@ function guardarMascota(e) {
         userId: usuarioActual.id,
         nombre,
         especie,
-        edad,
+        edadAnios: Number(edadAnios),
+        edadMeses: Number(edadMeses),
         raza,
-        peso,
+        pesoKg: Number(pesoKg),
+        pesoGramos: Number(pesoGramos),
         foto: fotoFinal,
         vacunas: []
     };
@@ -177,13 +212,11 @@ function guardarMascota(e) {
     mascotas.push(nuevaMascota);
     localStorage.setItem('mascotas_db', JSON.stringify(mascotas));
 
-    mostrarAlerta(alert, `¡Mascota ${nombre} registrada con éxito!`, "exito");
+    mostrarNotificacion(`¡Mascota ${nombre} registrada con éxito!`, "exito");
     document.getElementById('formMascota').reset();
     quitarFoto();
     actualizarListaMascotas();
     cargarSelectorMascotasIA();
-
-    setTimeout(() => alert.classList.add('oculto'), 3000);
 }
 
 function obtenerImagenPorDefecto(especie) {
@@ -211,6 +244,21 @@ function actualizarListaMascotas() {
     }
 
     misMascotas.forEach(m => {
+        // Formatear Edad (Años y Meses)
+        let textoEdad = `${m.edadAnios || 0} año(s)`;
+        if (m.edadMeses > 0) {
+            textoEdad += ` y ${m.edadMeses} mes(es)`;
+        }
+
+        // Formatear Peso (Kg y Gramos)
+        let textoPeso = `${m.pesoKg || 0} kg`;
+        if (m.pesoGramos > 0) {
+            textoPeso += ` ${m.pesoGramos} g`;
+        }
+        if ((!m.pesoKg || m.pesoKg == 0) && (!m.pesoGramos || m.pesoGramos == 0)) {
+            textoPeso = "No especificado";
+        }
+
         const card = document.createElement('div');
         card.className = 'pet-card';
         card.innerHTML = `
@@ -219,9 +267,9 @@ function actualizarListaMascotas() {
                 <h3>${m.nombre}</h3>
                 <div class="pet-details">
                     <p><strong>Especie:</strong> ${m.especie}</p>
-                    <p><strong>Edad:</strong> ${m.edad} año(s)</p>
+                    <p><strong>Edad:</strong> ${textoEdad}</p>
                     <p><strong>Raza:</strong> ${m.raza}</p>
-                    <p><strong>Peso:</strong> ${m.peso} kg</p>
+                    <p><strong>Peso:</strong> ${textoPeso}</p>
                     <p><strong>Vacunas registradas:</strong> ${m.vacunas ? m.vacunas.length : 0}</p>
                 </div>
             </div>
@@ -243,9 +291,11 @@ function abrirModalEditar(petId) {
     document.getElementById('editMascotaId').value = mascota.id;
     document.getElementById('editNombre').value = mascota.nombre;
     document.getElementById('editEspecie').value = mascota.especie;
-    document.getElementById('editEdad').value = mascota.edad;
+    document.getElementById('editEdadAnios').value = mascota.edadAnios !== undefined ? mascota.edadAnios : (mascota.edad || 0);
+    document.getElementById('editEdadMeses').value = mascota.edadMeses !== undefined ? mascota.edadMeses : 0;
     document.getElementById('editRaza').value = mascota.raza;
-    document.getElementById('editPeso').value = mascota.peso !== "No especificado" ? mascota.peso : "";
+    document.getElementById('editPesoKg').value = mascota.pesoKg !== undefined ? mascota.pesoKg : "";
+    document.getElementById('editPesoGramos').value = mascota.pesoGramos !== undefined ? mascota.pesoGramos : "";
     document.getElementById('editFotoUrl').value = "";
     
     tempFotoEditData = mascota.foto;
@@ -285,13 +335,16 @@ function guardarEdicionMascota(e) {
     if (mascotaIndex !== -1) {
         mascotas[mascotaIndex].nombre = document.getElementById('editNombre').value.trim();
         mascotas[mascotaIndex].especie = document.getElementById('editEspecie').value;
-        mascotas[mascotaIndex].edad = document.getElementById('editEdad').value;
+        mascotas[mascotaIndex].edadAnios = Number(document.getElementById('editEdadAnios').value) || 0;
+        mascotas[mascotaIndex].edadMeses = Number(document.getElementById('editEdadMeses').value) || 0;
         mascotas[mascotaIndex].raza = document.getElementById('editRaza').value.trim();
-        mascotas[mascotaIndex].peso = document.getElementById('editPeso').value || "No especificado";
+        mascotas[mascotaIndex].pesoKg = Number(document.getElementById('editPesoKg').value) || 0;
+        mascotas[mascotaIndex].pesoGramos = Number(document.getElementById('editPesoGramos').value) || 0;
         mascotas[mascotaIndex].foto = tempFotoEditData;
 
         localStorage.setItem('mascotas_db', JSON.stringify(mascotas));
 
+        mostrarNotificacion("¡Ficha de paciente actualizada con éxito!", "exito");
         actualizarListaMascotas();
         cargarSelectorMascotasIA();
         cerrarModalEditar();
@@ -325,6 +378,7 @@ function registrarVacuna(e) {
     mascotaSeleccionadaModal.vacunas.push({ nombre: nombreVacuna, fecha: fechaVacuna });
     localStorage.setItem('mascotas_db', JSON.stringify(mascotas));
 
+    mostrarNotificacion(`Vacuna "${nombreVacuna}" registrada correctamente.`, "exito");
     document.getElementById('formVacuna').reset();
     actualizarListaVacunasModal();
     actualizarListaMascotas();
@@ -376,7 +430,13 @@ function cambiarMascotaConsultaIA() {
     } else {
         const mascota = mascotas.find(m => m.id == petId);
         if (mascota) {
-            agregarMensajeBot(`Ficha biológica vinculada: <strong>${mascota.nombre}</strong> (${mascota.especie}, ${mascota.edad} años, Raza ${mascota.raza}, ${mascota.peso} kg). ¡Motor listo para responder consultas contextuales!`);
+            let edadStr = `${mascota.edadAnios || 0} años`;
+            if (mascota.edadMeses > 0) edadStr += ` y ${mascota.edadMeses} meses`;
+            
+            let pesoStr = `${mascota.pesoKg || 0} kg`;
+            if (mascota.pesoGramos > 0) pesoStr += ` ${mascota.pesoGramos} g`;
+
+            agregarMensajeBot(`Ficha biológica vinculada: <strong>${mascota.nombre}</strong> (${mascota.especie}, ${edadStr}, Raza ${mascota.raza}, ${pesoStr}). ¡Motor listo para responder consultas contextuales!`);
         }
     }
 }
@@ -461,16 +521,19 @@ function evaluarConsultaIAPro(pregunta, mascota) {
         return `Consulta recibida: <em>"${pregunta}"</em>.<br>Te sugiero seleccionar a tu mascota en el desplegable superior para evaluar sus datos biológicos y ficha técnica.`;
     }
 
+    let edadStr = `${mascota.edadAnios || 0} años`;
+    if (mascota.edadMeses > 0) edadStr += ` y ${mascota.edadMeses} meses`;
+
     // 2. Análisis Contextual de Vacunas (Con visualización Pro)
     if (msg.includes('vacuna') || msg.includes('vacunas') || msg.includes('inyeccion') || msg.includes('inmunizac')) {
         const vacunas = mascota.vacunas || [];
-        let html = `De acuerdo con la ficha de <strong>${mascota.nombre}</strong> (${mascota.especie}, ${mascota.edad} años):<br>`;
+        let html = `De acuerdo con la ficha de <strong>${mascota.nombre}</strong> (${mascota.especie}, ${edadStr}):<br>`;
         
         if (vacunas.length === 0) {
             html += `<div class="ai-card">
                         <div class="ai-card-title"><i class="ph ph-warning"></i> Estado de Inmunización:</div>
                         Actualmente no registra vacunas aplicadas en su carnet digital.
-                     </div>`;
+                   </div>`;
         } else {
             html += `<div class="ai-card">
                         <div class="ai-card-title"><i class="ph ph-check-circle"></i> Vacunas Registradas en Ficha:</div>
@@ -493,14 +556,21 @@ function evaluarConsultaIAPro(pregunta, mascota) {
 
     // 3. Orientación Nutricional Profesional
     if (msg.includes('alimento') || msg.includes('comer') || msg.includes('dieta') || msg.includes('nutricion') || msg.includes('peso')) {
-        const pesoInfo = mascota.peso !== "No especificado" ? `${mascota.peso} kg` : "No registrado";
+        let pesoInfo = `${mascota.pesoKg || 0} kg`;
+        if (mascota.pesoGramos > 0) pesoInfo += ` ${mascota.pesoGramos} g`;
+        if ((!mascota.pesoKg || mascota.pesoKg == 0) && (!mascota.pesoGramos || mascota.pesoGramos == 0)) {
+            pesoInfo = "No registrado";
+        }
+
+        const aniosTotales = (mascota.edadAnios || 0) + ((mascota.edadMeses || 0) / 12);
+
         return `
             <strong>Análisis Nutricional Personalizado:</strong><br>
             <div class="ai-card">
                 <div class="ai-card-title"><i class="ph ph-chart-bar"></i> Ficha Bioquímica de ${mascota.nombre}:</div>
                 <ul class="ai-list">
                     <li>🔹 <strong>Especie y Raza:</strong> ${mascota.especie} (${mascota.raza})</li>
-                    <li>🔹 <strong>Etapa de Vida:</strong> ${mascota.edad} año(s) — ${mascota.edad < 1 ? 'Cachorro' : (mascota.edad > 7 ? 'Geronte/Senior' : 'Adulto')}</li>
+                    <li>🔹 <strong>Etapa de Vida:</strong> ${edadStr} — ${aniosTotales < 1 ? 'Cachorro' : (aniosTotales > 7 ? 'Geronte/Senior' : 'Adulto')}</li>
                     <li>🔹 <strong>Peso Corporal:</strong> ${pesoInfo}</li>
                 </ul>
             </div>
@@ -514,14 +584,14 @@ function evaluarConsultaIAPro(pregunta, mascota) {
             <strong>Ficha de Cuidados de Raza (${mascota.raza}):</strong><br>
             <div class="ai-card">
                 <div class="ai-card-title"><i class="ph ph-heartbeat"></i> Recomendaciones para ${mascota.nombre}:</div>
-                • <strong>Actividad Física:</strong> Para su edad (${mascota.edad} años), requiere caminatas regulares y estimulación de juegos.<br>
+                • <strong>Actividad Física:</strong> Para su edad (${edadStr}), requiere caminatas regulares y estimulación de juegos.<br>
                 • <strong>Salud Mental:</strong> Los juegos interactivos reducen el estrés en el hogar y evitan conductas destructivas.
             </div>
         `;
     }
 
     // Respuesta Inteligente por Defecto
-    return `Comprendido tu mensaje referente a <strong>${mascota.nombre}</strong> (${mascota.especie}, ${mascota.edad} años, Raza ${mascota.raza}). Sus datos médicos y vacunas están sincronizados con el panel central. ¿Deseás profundizar sobre sus vacunas pendientes o plan nutricional?`;
+    return `Comprendido tu mensaje referente a <strong>${mascota.nombre}</strong> (${mascota.especie}, ${edadStr}, Raza ${mascota.raza}). Sus datos médicos y vacunas están sincronizados con el panel central. ¿Deseás profundizar sobre sus vacunas pendientes o plan nutricional?`;
 }
 
 // Helper Alertas
