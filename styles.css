@@ -29,6 +29,61 @@ body {
     display: none !important;
 }
 
+/* SISTEMA DE NOTIFICACIONES TOAST FLOTANTES */
+.toast-container {
+    position: fixed;
+    top: 20px;
+    right: 20px;
+    z-index: 9999;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    max-width: 360px;
+    width: 100%;
+    pointer-events: none;
+}
+
+.toast {
+    background: white;
+    color: var(--text-dark);
+    padding: 14px 18px;
+    border-radius: 12px;
+    box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.15);
+    border-left: 5px solid var(--primary);
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    font-size: 0.92rem;
+    font-weight: 500;
+    pointer-events: auto;
+    animation: slideInRight 0.3s ease forwards, fadeOut 0.3s ease 2.7s forwards;
+}
+
+.toast.exito {
+    border-left-color: var(--primary);
+}
+
+.toast.error {
+    border-left-color: var(--danger);
+}
+
+.toast i {
+    font-size: 1.3rem;
+}
+
+.toast.exito i { color: var(--primary); }
+.toast.error i { color: var(--danger); }
+
+@keyframes slideInRight {
+    from { transform: translateX(100%); opacity: 0; }
+    to { transform: translateX(0); opacity: 1; }
+}
+
+@keyframes fadeOut {
+    from { opacity: 1; }
+    to { opacity: 0; transform: translateY(-10px); }
+}
+
 /* AUTH OVERLAY */
 .auth-overlay {
     position: fixed;
@@ -293,6 +348,13 @@ body {
     display: flex;
     flex-direction: column;
     gap: 6px;
+}
+
+/* CLASE PARA DIVIDIR CAMPOS DOBLES (AÑOS/MESES, KG/GRAMOS) */
+.form-group-inline-double {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
 }
 
 .form-group label {
@@ -906,29 +968,26 @@ input[type="file"] { display: none; }
 
 .alerta.error { background: #fee2e2; color: var(--danger); }
 .alerta.exito { background: #d1fae5; color: var(--primary-dark); }
+
 /* =========================================================
    ADAPTACIÓN PARA CELULARES Y PANTALLAS CHICAS (RESPONSIVE)
    ========================================================= */
 @media (max-width: 768px) {
-    /* Permitir que la estructura principal se apile verticalmente */
     .app-container {
         flex-direction: column !important;
     }
 
-    /* Ajustar la barra lateral para que ocupe todo el ancho arriba */
     .sidebar {
         width: 100% !important;
         height: auto !important;
         position: relative !important;
     }
 
-    /* Hacer que el contenido principal también ocupe todo el ancho */
     .main-content {
         width: 100% !important;
         padding: 1rem !important;
     }
 
-    /* Adaptar las grillas de las tarjetas para que no se amontonen */
     .card-grid, .form-grid, .mascotas-grid {
         grid-template-columns: 1fr !important;
     }
